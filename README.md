@@ -9,26 +9,28 @@ Proyecto académico en Django. El análisis y el diseño están en `docs/`.
 
 ## Preparación local (Windows PowerShell)
 
-1. Crear un entorno virtual. Si Django ya está instalado en el Python del equipo y no hay acceso a internet, se puede exponer esa instalación con:
+1. Crear y activar un entorno virtual:
 
    ```powershell
-   python -m venv --system-site-packages .venv
-   ```
-
-2. Activar el entorno:
-
-   ```powershell
+   python -m venv .venv
    .\.venv\Scripts\Activate.ps1
    ```
 
-3. Si hay acceso a paquetes, instalar dependencias con `python -m pip install -r requirements.txt`.
-4. Copiar `.env.example` como `.env` y establecer una clave secreta local.
-5. Definir `AUTH_USER_MODEL = 'cuentas.Usuario'` antes de crear/aplicar migraciones. Ya está configurado en `config/settings.py`.
-6. Crear migraciones y aplicar la base de datos:
+   Si Django ya está instalado en el Python del equipo y no hay acceso a internet, agregar `--system-site-packages` al crear el entorno.
+
+2. Instalar las dependencias: `python -m pip install -r requirements.txt`.
+3. Copiar `.env.example` como `.env` y definir una clave secreta local.
+4. El modelo personalizado `cuentas.Usuario` ya está configurado como `AUTH_USER_MODEL`; debe permanecer definido antes de aplicar migraciones.
+5. Crear/aplicar migraciones (necesario al instalar en una base vacía):
 
    ```powershell
-   python manage.py makemigrations
    python manage.py migrate
+   ```
+
+6. Cargar los datos de demostración:
+
+   ```powershell
+   python manage.py seed_demo
    ```
 
 7. Iniciar el servidor:
@@ -37,4 +39,13 @@ Proyecto académico en Django. El análisis y el diseño están en `docs/`.
    python manage.py runserver
    ```
 
-El proyecto todavía no tiene datos semilla ni cuentas de prueba; se crearán en la fase de modelos.
+## Cuentas locales de demostración
+
+El seed crea cuentas para estudiante, dos empresas y administrador. La contraseña compartida es `PracticasDemo2026!`.
+
+- `estudiante@demo.local`
+- `empresa1@demo.local`
+- `empresa2@demo.local`
+- `admin@demo.local`
+
+Estas credenciales son únicamente para desarrollo local. El comando `seed_demo` se puede volver a ejecutar; actualiza sus registros de demostración y no duplica categorías ni ofertas.

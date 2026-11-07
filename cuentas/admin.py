@@ -1,6 +1,6 @@
 ﻿from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
-from .models import Usuario
+from .models import Empresa, PerfilEstudiante, Usuario
 
 
 @admin.register(Usuario)
@@ -19,3 +19,18 @@ class UsuarioAdmin(DjangoUserAdmin):
         (None, {'classes': ('wide',), 'fields': ('correo', 'nombre', 'rol', 'password1', 'password2')}),
     )
     readonly_fields = ('creado_en', 'last_login')
+
+
+@admin.register(PerfilEstudiante)
+class PerfilEstudianteAdmin(admin.ModelAdmin):
+    list_display = ('usuario', 'programa', 'semestre', 'ciudad')
+    search_fields = ('usuario__nombre', 'usuario__correo', 'programa', 'ciudad')
+    list_filter = ('programa', 'ciudad')
+
+
+@admin.register(Empresa)
+class EmpresaAdmin(admin.ModelAdmin):
+    list_display = ('razon_social', 'nit', 'sector', 'ciudad', 'estado')
+    search_fields = ('razon_social', 'nit', 'usuario__correo')
+    list_filter = ('estado', 'sector', 'ciudad')
+    readonly_fields = ('creado_en',)
