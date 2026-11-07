@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.db.models import ProtectedError, Q
 from django.shortcuts import get_object_or_404, redirect, render
@@ -30,7 +31,7 @@ def categorias(request):
 
 @administrador_requerido
 def categoria_crear(request):
-    formulario = CategoriaForm(request.POST or None)
+    formulario = CategoriaForm(request.POST if request.method == 'POST' else None)
     if request.method == 'POST' and formulario.is_valid():
         formulario.save()
         messages.success(request, 'La categoría se creó correctamente.')
@@ -41,7 +42,7 @@ def categoria_crear(request):
 @administrador_requerido
 def categoria_editar(request, pk):
     categoria = get_object_or_404(Categoria, pk=pk)
-    formulario = CategoriaForm(request.POST or None, instance=categoria)
+    formulario = CategoriaForm(request.POST if request.method == 'POST' else None, instance=categoria)
     if request.method == 'POST' and formulario.is_valid():
         formulario.save()
         messages.success(request, 'La categoría se actualizó correctamente.')
@@ -151,7 +152,7 @@ def oferta_crear(request):
     if empresa.estado != Empresa.Estado.APROBADA:
         messages.error(request, 'Empresa pendiente de aprobación')
         return redirect('ofertas:mis_ofertas')
-    formulario = OfertaForm(request.POST or None)
+    formulario = OfertaForm(request.POST if request.method == 'POST' else None)
     if request.method == 'POST' and formulario.is_valid():
         oferta = formulario.save(commit=False)
         oferta.empresa = empresa
@@ -168,11 +169,13 @@ def oferta_editar(request, pk):
     if empresa.estado != Empresa.Estado.APROBADA:
         messages.error(request, 'Empresa pendiente de aprobación')
         return redirect('ofertas:mis_ofertas')
-    oferta = get_object_or_404(Oferta, pk=pk, empresa=empresa)
+    oferta = get_object_or_404(Oferta, pk=pk)
+    if oferta.empresa_id != empresa.pk:
+        raise PermissionDenied
     if oferta.estado == Oferta.Estado.CERRADA:
         messages.error(request, 'No puedes editar una oferta cerrada.')
         return redirect('ofertas:mis_ofertas')
-    formulario = OfertaForm(request.POST or None, instance=oferta)
+    formulario = OfertaForm(request.POST if request.method == 'POST' else None, instance=oferta)
     if request.method == 'POST' and formulario.is_valid():
         oferta = formulario.save(commit=False)
         oferta.estado = Oferta.Estado.PENDIENTE
@@ -186,7 +189,9 @@ def oferta_editar(request, pk):
 @require_POST
 def oferta_cerrar(request, pk):
     empresa = get_object_or_404(Empresa, usuario=request.user)
-    oferta = get_object_or_404(Oferta, pk=pk, empresa=empresa)
+    oferta = get_object_or_404(Oferta, pk=pk)
+    if oferta.empresa_id != empresa.pk:
+        raise PermissionDenied
     if oferta.estado != Oferta.Estado.CERRADA:
         oferta.estado = Oferta.Estado.CERRADA
         oferta.save(update_fields=['estado'])

@@ -42,7 +42,7 @@ def dashboard(request):
 
 @administrador_requerido
 def reporte(request):
-    formulario = ReporteFiltrosForm(request.GET or None)
+    formulario = ReporteFiltrosForm(request.GET)
     queryset = Postulacion.objects.select_related(
         'estudiante', 'estudiante__perfil_estudiante', 'oferta',
         'oferta__empresa', 'oferta__categoria',

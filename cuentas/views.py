@@ -22,7 +22,7 @@ def registro(request):
 
 
 def registro_estudiante(request):
-    form = RegistroEstudianteForm(request.POST or None)
+    form = RegistroEstudianteForm(request.POST if request.method == 'POST' else None)
     if request.method == 'POST' and form.is_valid():
         form.save()
         messages.success(request, 'Tu cuenta quedó creada. Ya puedes ingresar.')
@@ -31,7 +31,7 @@ def registro_estudiante(request):
 
 
 def registro_empresa(request):
-    form = RegistroEmpresaForm(request.POST or None)
+    form = RegistroEmpresaForm(request.POST if request.method == 'POST' else None)
     if request.method == 'POST' and form.is_valid():
         form.save()
         messages.success(request, 'La cuenta quedó registrada. La empresa está pendiente de aprobación.')
@@ -43,7 +43,7 @@ def ingresar(request):
     destino = request.POST.get('next') or request.GET.get('next', '')
     if request.user.is_authenticated:
         return _destino_por_rol(request.user.rol)
-    form = IngresoForm(request, data=request.POST or None)
+    form = IngresoForm(request, data=request.POST if request.method == 'POST' else None)
     if request.method == 'POST' and form.is_valid():
         usuario = form.get_user()
         login(request, usuario)
@@ -80,10 +80,10 @@ def perfil(request):
 def perfil_editar(request):
     if request.user.rol == 'estudiante':
         instancia = get_object_or_404(PerfilEstudiante, usuario=request.user)
-        formulario = PerfilEstudianteForm(request.POST or None, instance=instancia, usuario=request.user)
+        formulario = PerfilEstudianteForm(request.POST if request.method == 'POST' else None, instance=instancia, usuario=request.user)
     else:
         instancia = get_object_or_404(Empresa, usuario=request.user)
-        formulario = EmpresaPerfilForm(request.POST or None, instance=instancia, usuario=request.user)
+        formulario = EmpresaPerfilForm(request.POST if request.method == 'POST' else None, instance=instancia, usuario=request.user)
     if request.method == 'POST' and formulario.is_valid():
         formulario.save()
         messages.success(request, 'El perfil se actualizó correctamente.')
