@@ -10,6 +10,7 @@ from cuentas.models import Empresa
 from cuentas.permissions import administrador_requerido, empresa_requerida
 from .forms import CategoriaForm, OfertaForm
 from .models import Categoria, Oferta
+from postulaciones.models import Postulacion
 
 
 @administrador_requerido
@@ -118,7 +119,8 @@ def detalle(request, pk):
         Oferta.objects.select_related('empresa', 'categoria'),
         pk=pk, estado=Oferta.Estado.PUBLICADA,
     )
-    return render(request, 'ofertas/detalle.html', {'oferta': oferta, 'vigente': oferta.fecha_limite >= timezone.localdate()})
+    postulacion = Postulacion.objects.filter(oferta=oferta, estudiante=request.user).first() if request.user.is_authenticated and request.user.rol == 'estudiante' else None
+    return render(request, 'ofertas/detalle.html', {'oferta': oferta, 'vigente': oferta.fecha_limite >= timezone.localdate(), 'postulacion': postulacion})
 
 
 @empresa_requerida
