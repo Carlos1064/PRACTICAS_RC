@@ -1,0 +1,22 @@
+﻿# Django
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Entornos virtuales
+.venv/
+.venv*/
+venv/
+ENV/
+
+# Variables y datos locales
+.env
+!.env.example
+db.sqlite3
+staticfiles/
+media/
+
+# Herramientas
+.vscode/
+.idea/
+.pytest_cache/
