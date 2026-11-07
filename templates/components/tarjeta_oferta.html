@@ -1,0 +1,7 @@
+﻿<article class="offer-card">
+  <div class="offer-card-top"><span class="eyebrow">{{ oferta.get_tipo_display }}</span><span class="status-badge status-{{ oferta.estado }}">{{ oferta.get_estado_display }}</span></div>
+  <h3><a href="/ofertas/{{ oferta.pk }}/">{{ oferta.titulo }}</a></h3>
+  <p class="offer-company">{{ oferta.empresa.razon_social }} · {{ oferta.empresa.ciudad }}</p>
+  <div class="offer-meta"><span>{{ oferta.categoria.nombre }}</span><span>{{ oferta.get_modalidad_display }}</span><span>{{ oferta.vacantes }} vacante{{ oferta.vacantes|pluralize:"s" }}</span></div>
+  <div class="offer-card-bottom"><span class="muted">Hasta {{ oferta.fecha_limite|date:"j M Y" }}</span><a class="text-link" href="/ofertas/{{ oferta.pk }}/">Ver oportunidad <span aria-hidden="true">→</span></a></div>
+</article>

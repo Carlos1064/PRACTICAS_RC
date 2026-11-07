@@ -1,0 +1,54 @@
+﻿{% load static %}<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Plataforma de prácticas y oportunidades laborales para estudiantes, egresados y empresas.">
+  <title>{% block title %}Oportunidades laborales{% endblock %} · Prácticas RC</title>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+  <a class="skip-link" href="#contenido">Ir al contenido principal</a>
+  <header class="site-header">
+    <nav class="navbar container" aria-label="Navegación principal">
+      <a class="brand" href="/" aria-label="Prácticas RC, inicio"><span class="brand-mark">PR</span><span>Prácticas<span class="brand-light">RC</span></span></a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-links" data-nav-toggle>Menú</button>
+      <div class="nav-links" id="nav-links" data-nav-menu>
+        <a href="/ofertas/">Explorar ofertas</a>
+        {% if user.is_authenticated %}
+          {% if user.rol == 'estudiante' %}
+            <a href="/cuentas/postulaciones/">Mis postulaciones</a>
+          {% elif user.rol == 'empresa' %}
+            <a href="/empresa/ofertas/">Mis ofertas</a>
+          {% elif user.rol == 'administrador' %}
+            <a href="/admin-plataforma/">Administración</a>
+          {% endif %}
+          <a href="/cuentas/perfil/">{{ user.nombre }}</a>
+          <form method="post" action="/cuentas/salir/" class="nav-inline-form">{% csrf_token %}<button class="nav-link-button" type="submit">Cerrar sesión</button></form>
+        {% else %}
+          <a href="/cuentas/ingresar/">Ingresar</a>
+          <a class="button button-small" href="/cuentas/registro/">Crear cuenta</a>
+        {% endif %}
+      </div>
+    </nav>
+  </header>
+  {% if messages %}
+    <section class="container message-stack" aria-label="Notificaciones" aria-live="polite">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }}" role="status">
+          <span>{{ message }}</span><button type="button" class="alert-dismiss" aria-label="Cerrar aviso" data-dismiss>×</button>
+        </div>
+      {% endfor %}
+    </section>
+  {% endif %}
+  <main id="contenido" class="main-content">
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="site-footer">
+    <div class="container footer-inner"><a class="brand brand-footer" href="/">Prácticas<span class="brand-light">RC</span></a><p>Conectamos talento con oportunidades.</p><span>© {% now "Y" %} · Plataforma académica</span></div>
+  </footer>
+  <script src="{% static 'js/app.js' %}" defer></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>
