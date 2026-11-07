@@ -2,13 +2,14 @@ from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.http import urlencode, url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
 from .forms import EmpresaPerfilForm, IngresoForm, PerfilEstudianteForm, RegistroEmpresaForm, RegistroEstudianteForm
-from .models import Empresa, PerfilEstudiante
+from .models import Empresa, PerfilEstudiante, Usuario
 from .permissions import administrador_requerido, roles_requeridos
 
 
@@ -123,3 +124,50 @@ def empresa_decision(request, pk):
     else:
         messages.error(request, 'La decisión enviada no es válida.')
     return redirect('cuentas_admin:empresas_pendientes')
+
+
+@administrador_requerido
+def usuarios(request):
+    consulta = request.GET.get('q', '').strip()
+    rol = request.GET.get('rol', '').strip()
+    queryset = Usuario.objects.all()
+    if consulta:
+        queryset = queryset.filter(Q(nombre__icontains=consulta) | Q(correo__icontains=consulta))
+    if rol in Usuario.Rol.values:
+        queryset = queryset.filter(rol=rol)
+    page_obj = Paginator(queryset, 15).get_page(request.GET.get('page'))
+    parametros = request.GET.copy()
+    parametros.pop('page', None)
+    return render(request, 'cuentas/admin/usuarios.html', {
+        'page_obj': page_obj, 'usuarios': page_obj.object_list,
+        'consulta': consulta, 'rol_filtro': rol, 'roles': Usuario.Rol.choices,
+        'querystring': urlencode(parametros),
+    })
+
+
+@administrador_requerido
+@require_POST
+def usuario_actualizar(request, pk):
+    usuario = get_object_or_404(Usuario, pk=pk)
+    if usuario.pk == request.user.pk:
+        messages.error(request, 'No puedes cambiar el estado o el rol de tu propia cuenta.')
+        return redirect('cuentas_admin:usuarios')
+    rol_nuevo = request.POST.get('rol', '')
+    activo_nuevo = request.POST.get('activo') == 'si'
+    if rol_nuevo not in Usuario.Rol.values:
+        messages.error(request, 'El rol seleccionado no es válido.')
+        return redirect('cuentas_admin:usuarios')
+    pierde_admin = usuario.rol == Usuario.Rol.ADMINISTRADOR and (
+        rol_nuevo != Usuario.Rol.ADMINISTRADOR or not activo_nuevo
+    )
+    if pierde_admin and usuario.is_active and Usuario.objects.filter(
+        rol=Usuario.Rol.ADMINISTRADOR, is_active=True,
+    ).count() <= 1:
+        messages.error(request, 'Debe permanecer al menos una cuenta administradora activa.')
+        return redirect('cuentas_admin:usuarios')
+    with transaction.atomic():
+        usuario.rol = rol_nuevo
+        usuario.is_active = activo_nuevo
+        usuario.save(update_fields=['rol', 'is_active'])
+    messages.success(request, 'La cuenta se actualizó correctamente.')
+    return redirect('cuentas_admin:usuarios')
