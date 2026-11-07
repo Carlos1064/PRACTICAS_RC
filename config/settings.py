@@ -1,4 +1,4 @@
-﻿from pathlib import Path
+from pathlib import Path
 import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -70,7 +70,7 @@ DATABASES = {
 
 AUTH_USER_MODEL = 'cuentas.Usuario'
 AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.ModelBackend']
-LOGIN_URL = 'admin:login'
+LOGIN_URL = 'cuentas:ingresar'
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},

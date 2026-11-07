@@ -1,10 +1,18 @@
 ﻿from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
+from django.contrib.auth.forms import UserCreationForm
 from .models import Empresa, PerfilEstudiante, Usuario
+
+
+class UsuarioCreationForm(UserCreationForm):
+    class Meta(UserCreationForm.Meta):
+        model = Usuario
+        fields = ('correo', 'nombre', 'rol')
 
 
 @admin.register(Usuario)
 class UsuarioAdmin(DjangoUserAdmin):
+    add_form = UsuarioCreationForm
     ordering = ('correo',)
     list_display = ('correo', 'nombre', 'rol', 'is_active', 'is_staff')
     list_filter = ('rol', 'is_active', 'is_staff')
