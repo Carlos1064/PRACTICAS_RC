@@ -23,4 +23,15 @@
       }
     });
   });
+  document.querySelectorAll('[data-dialog-open]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      const dialog = document.getElementById(button.dataset.dialogOpen);
+      if (dialog && typeof dialog.showModal === 'function') dialog.showModal();
+    });
+  });
+  document.querySelectorAll('[data-dialog-close]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      button.closest('dialog')?.close();
+    });
+  });
 })();

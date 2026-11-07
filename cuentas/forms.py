@@ -1,7 +1,7 @@
 ﻿from django import forms
-from django.contrib.auth import authenticate, password_validation
 from django.contrib.auth.forms import AuthenticationForm
 from django.core.exceptions import ValidationError
+from django.contrib.auth import password_validation
 from django.db import transaction
 
 from .models import Empresa, PerfilEstudiante, Usuario
@@ -26,27 +26,26 @@ class RegistroEstudianteForm(forms.Form):
         datos = super().clean()
         if datos.get('password1') and datos.get('password2') and datos['password1'] != datos['password2']:
             self.add_error('password2', 'Las contraseñas no coinciden.')
+        self._validar_password(datos)
+        return datos
+
+    def _validar_password(self, datos):
         if datos.get('password1'):
             usuario = Usuario(nombre=datos.get('nombre', ''), correo=datos.get('correo', ''))
             try:
                 password_validation.validate_password(datos['password1'], usuario)
             except ValidationError as error:
                 self.add_error('password1', error)
-        return datos
 
     @transaction.atomic
     def save(self):
         usuario = Usuario.objects.create_user(
-            correo=self.cleaned_data['correo'],
-            password=self.cleaned_data['password1'],
-            nombre=self.cleaned_data['nombre'],
-            rol=Usuario.Rol.ESTUDIANTE,
+            correo=self.cleaned_data['correo'], password=self.cleaned_data['password1'],
+            nombre=self.cleaned_data['nombre'], rol=Usuario.Rol.ESTUDIANTE,
         )
         PerfilEstudiante.objects.create(
-            usuario=usuario,
-            programa=self.cleaned_data['programa'],
-            semestre=self.cleaned_data.get('semestre'),
-            ciudad=self.cleaned_data['ciudad'],
+            usuario=usuario, programa=self.cleaned_data['programa'],
+            semestre=self.cleaned_data.get('semestre'), ciudad=self.cleaned_data['ciudad'],
         )
         return usuario
 
@@ -89,18 +88,13 @@ class RegistroEmpresaForm(forms.Form):
     @transaction.atomic
     def save(self):
         usuario = Usuario.objects.create_user(
-            correo=self.cleaned_data['correo'],
-            password=self.cleaned_data['password1'],
-            nombre=self.cleaned_data['nombre'],
-            rol=Usuario.Rol.EMPRESA,
+            correo=self.cleaned_data['correo'], password=self.cleaned_data['password1'],
+            nombre=self.cleaned_data['nombre'], rol=Usuario.Rol.EMPRESA,
         )
         Empresa.objects.create(
-            usuario=usuario,
-            razon_social=self.cleaned_data['razon_social'],
-            nit=self.cleaned_data['nit'],
-            sector=self.cleaned_data['sector'],
-            ciudad=self.cleaned_data['ciudad'],
-            descripcion=self.cleaned_data['descripcion'],
+            usuario=usuario, razon_social=self.cleaned_data['razon_social'],
+            nit=self.cleaned_data['nit'], sector=self.cleaned_data['sector'],
+            ciudad=self.cleaned_data['ciudad'], descripcion=self.cleaned_data['descripcion'],
             estado=Empresa.Estado.PENDIENTE,
         )
         return usuario
@@ -109,8 +103,53 @@ class RegistroEmpresaForm(forms.Form):
 class IngresoForm(AuthenticationForm):
     username = forms.EmailField(label='Correo electrónico', widget=forms.EmailInput(attrs={'autocomplete': 'email'}))
     password = forms.CharField(label='Contraseña', strip=False, widget=forms.PasswordInput(attrs={'autocomplete': 'current-password'}))
-
     error_messages = {
         'invalid_login': 'El correo o la contraseña no son correctos.',
         'inactive': 'Esta cuenta está desactivada. Contacta al administrador.',
     }
+
+
+class PerfilEstudianteForm(forms.ModelForm):
+    nombre = forms.CharField(label='Nombre completo', max_length=150)
+
+    class Meta:
+        model = PerfilEstudiante
+        fields = ('programa', 'semestre', 'ciudad', 'habilidades', 'resumen', 'cv_url')
+        widgets = {'habilidades': forms.Textarea(attrs={'rows': 3}), 'resumen': forms.Textarea(attrs={'rows': 4})}
+
+    def __init__(self, *args, usuario, **kwargs):
+        self.usuario = usuario
+        super().__init__(*args, **kwargs)
+        self.fields['nombre'].initial = usuario.nombre
+        self.fields['semestre'].required = False
+        self.fields['cv_url'].required = False
+
+    def save(self, commit=True):
+        perfil = super().save(commit=False)
+        self.usuario.nombre = self.cleaned_data['nombre']
+        if commit:
+            self.usuario.save(update_fields=['nombre'])
+            perfil.save()
+        return perfil
+
+
+class EmpresaPerfilForm(forms.ModelForm):
+    nombre = forms.CharField(label='Nombre de quien representa a la empresa', max_length=150)
+
+    class Meta:
+        model = Empresa
+        fields = ('razon_social', 'nit', 'sector', 'ciudad', 'descripcion')
+        widgets = {'descripcion': forms.Textarea(attrs={'rows': 4})}
+
+    def __init__(self, *args, usuario, **kwargs):
+        self.usuario = usuario
+        super().__init__(*args, **kwargs)
+        self.fields['nombre'].initial = usuario.nombre
+
+    def save(self, commit=True):
+        empresa = super().save(commit=False)
+        self.usuario.nombre = self.cleaned_data['nombre']
+        if commit:
+            self.usuario.save(update_fields=['nombre'])
+            empresa.save()
+        return empresa

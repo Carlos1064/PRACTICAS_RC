@@ -1,12 +1,14 @@
-from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.forms import AuthenticationForm
+﻿from django.contrib import messages
+from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect, render
+from django.core.paginator import Paginator
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
-from .forms import IngresoForm, RegistroEmpresaForm, RegistroEstudianteForm
+from .forms import EmpresaPerfilForm, IngresoForm, PerfilEstudianteForm, RegistroEmpresaForm, RegistroEstudianteForm
 from .models import Empresa, PerfilEstudiante
+from .permissions import roles_requeridos
 
 
 def inicio(request):
@@ -67,13 +69,21 @@ def salir(request):
 
 @login_required
 def perfil(request):
-    perfil_estudiante = None
-    empresa = None
+    estudiante = PerfilEstudiante.objects.filter(usuario=request.user).first() if request.user.rol == 'estudiante' else None
+    empresa = Empresa.objects.filter(usuario=request.user).first() if request.user.rol == 'empresa' else None
+    return render(request, 'cuentas/perfil.html', {'perfil_estudiante': estudiante, 'empresa': empresa})
+
+
+@roles_requeridos('estudiante', 'empresa')
+def perfil_editar(request):
     if request.user.rol == 'estudiante':
-        perfil_estudiante = PerfilEstudiante.objects.filter(usuario=request.user).first()
-    elif request.user.rol == 'empresa':
-        empresa = Empresa.objects.filter(usuario=request.user).first()
-    return render(request, 'cuentas/perfil.html', {
-        'perfil_estudiante': perfil_estudiante,
-        'empresa': empresa,
-    })
+        instancia = get_object_or_404(PerfilEstudiante, usuario=request.user)
+        formulario = PerfilEstudianteForm(request.POST or None, instance=instancia, usuario=request.user)
+    else:
+        instancia = get_object_or_404(Empresa, usuario=request.user)
+        formulario = EmpresaPerfilForm(request.POST or None, instance=instancia, usuario=request.user)
+    if request.method == 'POST' and formulario.is_valid():
+        formulario.save()
+        messages.success(request, 'El perfil se actualizó correctamente.')
+        return redirect('cuentas:perfil')
+    return render(request, 'cuentas/perfil_editar.html', {'form': formulario})

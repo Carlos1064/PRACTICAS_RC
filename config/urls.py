@@ -1,11 +1,12 @@
 ﻿from django.contrib import admin
 from django.urls import include, path
-from config import views as error_views
 from cuentas.views import inicio
 
 urlpatterns = [
     path('', inicio, name='inicio'),
     path('cuentas/', include('cuentas.urls')),
+    path('', include('ofertas.urls')),
+    path('admin-plataforma/', include('panel.urls')),
     path('admin/', admin.site.urls),
 ]
 
