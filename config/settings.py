@@ -18,6 +18,8 @@ cargar_env(BASE_DIR / '.env')
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'clave-local-solo-desarrollo-cambiar-en-produccion')
 DEBUG = os.environ.get('DEBUG', 'True').lower() in {'1', 'true', 'yes', 'si'}
+if not DEBUG and (SECRET_KEY.startswith('pon-aqui-') or SECRET_KEY == 'clave-local-solo-desarrollo-cambiar-en-produccion'):
+    raise RuntimeError('Configura una SECRET_KEY real en .env antes de usar DEBUG=False.')
 ALLOWED_HOSTS = [host.strip() for host in os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',') if host.strip()]
 
 INSTALLED_APPS = [
