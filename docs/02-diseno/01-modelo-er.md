@@ -1,4 +1,4 @@
-﻿# Diseño del modelo de datos
+# Diseño del modelo de datos
 
 ## Decisiones de diseño
 
@@ -16,7 +16,7 @@
 | `PerfilEstudiante` | `id` (PK), `usuario_id` (FK 1:1), `programa`, `semestre` (opcional), `ciudad`, `habilidades`, `resumen`, `cv_url` (opcional) | Un perfil por usuario estudiante. Borrado en cascada al eliminar la cuenta. |
 | `Empresa` | `id` (PK), `usuario_id` (FK 1:1), `razon_social`, `nit`, `sector`, `ciudad`, `descripcion`, `estado`, `creado_en` | `nit` único; `estado`: pendiente, aprobada o rechazada. Una sola empresa por cuenta con rol empresa. |
 | `Categoria` | `id` (PK), `nombre`, `descripcion` | `nombre` único. Las categorías referenciadas por ofertas no se eliminan en cascada. |
-| `Oferta` | `id` (PK), `empresa_id` (FK), `categoria_id` (FK), `titulo`, `descripcion`, `requisitos`, `tipo`, `modalidad`, `vacantes`, `fecha_limite`, `estado`, `creado_en` | `tipo`: práctica o empleo. `modalidad`: presencial, remota o híbrida. `vacantes > 0`. `estado`: pendiente, publicada o cerrada. La fecha límite no puede ser pasada al crear. |
+| `Oferta` | `id` (PK), `empresa_id` (FK), `categoria_id` (FK), `titulo`, `descripcion`, `requisitos`, `tipo`, `modalidad`, `vacantes`, `fecha_limite`, `estado`, `creado_en` | `tipo`: práctica o empleo. `modalidad`: presencial, remota o híbrida. `vacantes > 0`. `estado`: pendiente, publicada, rechazada o cerrada. La fecha límite no puede ser pasada al crear. |
 | `Postulacion` | `id` (PK), `oferta_id` (FK), `estudiante_id` (FK a Usuario), `mensaje` (opcional), `estado`, `creado_en` | Única por pareja `(oferta_id, estudiante_id)`. `estado`: enviada, en revisión, preseleccionado, rechazado, contratado o retirada. |
 
 ## Relaciones

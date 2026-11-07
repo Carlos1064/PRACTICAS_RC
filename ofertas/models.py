@@ -28,16 +28,11 @@ class Oferta(models.Model):
     class Estado(models.TextChoices):
         PENDIENTE = 'pendiente', 'Pendiente'
         PUBLICADA = 'publicada', 'Publicada'
+        RECHAZADA = 'rechazada', 'Rechazada'
         CERRADA = 'cerrada', 'Cerrada'
 
-    empresa = models.ForeignKey(
-        'cuentas.Empresa', on_delete=models.PROTECT,
-        related_name='ofertas', verbose_name='empresa',
-    )
-    categoria = models.ForeignKey(
-        Categoria, on_delete=models.PROTECT,
-        related_name='ofertas', verbose_name='categoría',
-    )
+    empresa = models.ForeignKey('cuentas.Empresa', on_delete=models.PROTECT, related_name='ofertas', verbose_name='empresa')
+    categoria = models.ForeignKey(Categoria, on_delete=models.PROTECT, related_name='ofertas', verbose_name='categoría')
     titulo = models.CharField('título', max_length=180)
     descripcion = models.TextField('descripción')
     requisitos = models.TextField('requisitos')
@@ -45,19 +40,14 @@ class Oferta(models.Model):
     modalidad = models.CharField('modalidad', max_length=12, choices=Modalidad.choices)
     vacantes = models.PositiveSmallIntegerField('vacantes')
     fecha_limite = models.DateField('fecha límite')
-    estado = models.CharField(
-        'estado', max_length=12, choices=Estado.choices,
-        default=Estado.PENDIENTE,
-    )
+    estado = models.CharField('estado', max_length=12, choices=Estado.choices, default=Estado.PENDIENTE)
     creado_en = models.DateTimeField('creada el', auto_now_add=True)
 
     class Meta:
         verbose_name = 'oferta'
         verbose_name_plural = 'ofertas'
         ordering = ['-creado_en', 'titulo']
-        constraints = [
-            models.CheckConstraint(condition=Q(vacantes__gt=0), name='oferta_vacantes_positivas'),
-        ]
+        constraints = [models.CheckConstraint(condition=Q(vacantes__gt=0), name='oferta_vacantes_positivas')]
         indexes = [
             models.Index(fields=['estado', 'fecha_limite'], name='oferta_estado_fecha_idx'),
             models.Index(fields=['tipo', 'modalidad'], name='oferta_tipo_modalidad_idx'),

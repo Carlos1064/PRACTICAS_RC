@@ -1,4 +1,4 @@
-﻿from django.urls import path
+from django.urls import path
 from . import views
 
 app_name = 'cuentas'
@@ -10,4 +10,6 @@ urlpatterns = [
     path('salir/', views.salir, name='salir'),
     path('perfil/', views.perfil, name='perfil'),
     path('perfil/editar/', views.perfil_editar, name='perfil_editar'),
+    path('admin-plataforma/empresas/pendientes/', views.empresas_pendientes, name='empresas_pendientes'),
+    path('admin-plataforma/empresas/<int:pk>/decision/', views.empresa_decision, name='empresa_decision'),
 ]
