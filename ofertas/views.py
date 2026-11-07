@@ -62,12 +62,63 @@ def categoria_eliminar(request, pk):
 
 
 def lista(request):
-    ofertas = Oferta.objects.filter(
+    hoy = timezone.localdate()
+    queryset = Oferta.objects.filter(
         estado=Oferta.Estado.PUBLICADA,
-        fecha_limite__gte=timezone.localdate(),
+        fecha_limite__gte=hoy,
+        empresa__estado=Empresa.Estado.APROBADA,
     ).select_related('empresa', 'categoria')
-    page_obj = Paginator(ofertas, 9).get_page(request.GET.get('page'))
-    return render(request, 'ofertas/lista.html', {'page_obj': page_obj, 'ofertas': page_obj.object_list, 'querystring': ''})
+
+    consulta = request.GET.get('q', '').strip()
+    tipo = request.GET.get('tipo', '').strip()
+    categoria_id = request.GET.get('categoria', '').strip()
+    modalidad = request.GET.get('modalidad', '').strip()
+    ciudad = request.GET.get('ciudad', '').strip()
+
+    if consulta:
+        queryset = queryset.filter(
+            Q(titulo__icontains=consulta) | Q(descripcion__icontains=consulta) |
+            Q(requisitos__icontains=consulta) | Q(empresa__razon_social__icontains=consulta) |
+            Q(categoria__nombre__icontains=consulta)
+        )
+    if tipo in Oferta.Tipo.values:
+        queryset = queryset.filter(tipo=tipo)
+    if categoria_id.isdigit():
+        queryset = queryset.filter(categoria_id=int(categoria_id))
+    if modalidad in Oferta.Modalidad.values:
+        queryset = queryset.filter(modalidad=modalidad)
+    if ciudad:
+        queryset = queryset.filter(empresa__ciudad__iexact=ciudad)
+
+    page_obj = Paginator(queryset, 9).get_page(request.GET.get('page'))
+    parametros = request.GET.copy()
+    parametros.pop('page', None)
+    contexto = {
+        'page_obj': page_obj,
+        'ofertas': page_obj.object_list,
+        'consulta': consulta,
+        'tipo_filtro': tipo,
+        'categoria_filtro': categoria_id,
+        'modalidad_filtro': modalidad,
+        'ciudad_filtro': ciudad,
+        'categorias': Categoria.objects.order_by('nombre'),
+        'tipos_oferta': Oferta.Tipo.choices,
+        'modalidades': Oferta.Modalidad.choices,
+        'ciudades': Empresa.objects.filter(estado=Empresa.Estado.APROBADA, ofertas__estado=Oferta.Estado.PUBLICADA, ofertas__fecha_limite__gte=hoy).values_list('ciudad', flat=True).distinct().order_by('ciudad'),
+        'querystring': urlencode(parametros),
+        'total_resultados': page_obj.paginator.count,
+    }
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return render(request, 'ofertas/_resultados.html', contexto)
+    return render(request, 'ofertas/lista.html', contexto)
+
+
+def detalle(request, pk):
+    oferta = get_object_or_404(
+        Oferta.objects.select_related('empresa', 'categoria'),
+        pk=pk, estado=Oferta.Estado.PUBLICADA,
+    )
+    return render(request, 'ofertas/detalle.html', {'oferta': oferta, 'vigente': oferta.fecha_limite >= timezone.localdate()})
 
 
 @empresa_requerida
@@ -88,6 +139,7 @@ def mis_ofertas(request):
     return render(request, 'ofertas/empresa/lista.html', {
         'empresa': empresa, 'page_obj': page_obj, 'ofertas': page_obj.object_list,
         'consulta': consulta, 'estado_filtro': estado, 'querystring': urlencode(parametros),
+        'estados_oferta': Oferta.Estado.choices,
     })
 
 

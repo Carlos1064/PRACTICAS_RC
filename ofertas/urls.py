@@ -3,7 +3,8 @@ from . import views
 
 app_name = 'ofertas'
 urlpatterns = [
-    path('', views.lista, name='lista'),
+    path('ofertas/', views.lista, name='lista'),
+    path('ofertas/<int:pk>/', views.detalle, name='detalle'),
     path('empresa/ofertas/', views.mis_ofertas, name='mis_ofertas'),
     path('empresa/ofertas/nueva/', views.oferta_crear, name='crear'),
     path('empresa/ofertas/<int:pk>/editar/', views.oferta_editar, name='editar'),
