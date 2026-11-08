@@ -6,6 +6,13 @@
 2. En la base, copia la **Internal Database URL**. No la publiques ni la guardes en GitHub.
 3. Abre el servicio web → **Environment** y agrega `DATABASE_URL` con esa URL.
 4. Mantén `DEBUG=False` y configura `SECRET_KEY` con un valor aleatorio generado por Render. `RENDER_EXTERNAL_HOSTNAME` se añade automáticamente a los hosts y orígenes CSRF por la configuración de Django.
+5. Para crear el administrador sin usar Render Shell, agrega temporalmente estas variables secretas al servicio web:
+
+   - `BOOTSTRAP_ADMIN_EMAIL`: correo que usarás para administrar la plataforma.
+   - `BOOTSTRAP_ADMIN_NAME`: nombre del administrador.
+   - `BOOTSTRAP_ADMIN_PASSWORD`: una contraseña larga, única y distinta de las cuentas demo.
+
+   Guarda las variables seleccionando **Save, rebuild, and deploy**. El build ejecuta migraciones y crea la cuenta si todavía no existe. El comando no cambia la contraseña en despliegues posteriores. Después del despliegue, elimina `BOOTSTRAP_ADMIN_PASSWORD` (y las otras dos variables si quieres) del servicio; la cuenta creada permanece en PostgreSQL.
 
 El plan Free de Render vence a los 30 días. Exporta la información que quieras conservar antes de esa fecha o cambia la base a un plan persistente. El sistema no guardará cambios de producción en SQLite si falta `DATABASE_URL`: Django detendrá el arranque para evitar perder datos silenciosamente.
 
@@ -20,13 +27,7 @@ El build instala dependencias, recopila CSS/JavaScript con `collectstatic` y apl
 
 ## Cuenta y primeros datos
 
-Después del primer despliegue, abre **Shell** en el servicio y ejecuta:
-
-```bash
-python manage.py createsuperuser
-```
-
-Usa el correo y contraseña del administrador real del proyecto. Entra al panel para crear categorías y luego registra empresas y estudiantes desde la aplicación. La cuenta de superusuario recibe el rol de administrador de la plataforma.
+Entra con el correo y la contraseña configurados arriba. La cuenta recibe el rol administrador de la plataforma. Desde el panel crea categorías y luego registra empresas y estudiantes desde la aplicación.
 
 ## Verificación funcional
 
