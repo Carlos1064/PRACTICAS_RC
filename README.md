@@ -1,51 +1,121 @@
-﻿# Plataforma de Prácticas y Oportunidades Laborales
+# Plataforma de Prácticas y Oportunidades Laborales
 
-Proyecto académico en Django. El análisis y el diseño están en `docs/`.
+Aplicación académica para reunir ofertas de prácticas y empleo, perfiles de estudiantes y empresas, y seguimiento de postulaciones. El proyecto usa Django con arquitectura MVT y SQLite en desarrollo. El análisis, los diseños, la matriz de pruebas y el manual están en `docs/`.
 
-## Requisitos
+## Funciones
+
+- Registro e ingreso para estudiantes/egresados y empresas.
+- Aprobación administrativa de empresas y ofertas antes de publicarlas.
+- Gestión de perfiles, categorías y ofertas.
+- Búsqueda de oportunidades con filtros, paginación y actualización parcial con `fetch`.
+- Postulaciones únicas, retiro y seguimiento de estados.
+- Panel con indicadores, gráficos y reporte filtrable con exportación CSV.
+- Control de acceso por rol, validación de servidor y navegador, mensajes visuales y páginas propias 403, 404 y 500.
+
+## Tecnologías
 
 - Python 3.12 o superior compatible con Django 5.2.
-- Git.
+- Django 5.2.18.
+- SQLite para desarrollo.
+- HTML5, CSS3 y JavaScript.
+- Chart.js 4.4.8 desde CDN en el panel (el resumen en texto sigue disponible si no carga el CDN).
 
-## Preparación local (Windows PowerShell)
+## Instalación local en Windows PowerShell
 
-1. Crear y activar un entorno virtual:
+Desde la carpeta del proyecto:
+
+1. Crear un entorno virtual:
 
    ```powershell
    python -m venv .venv
+   ```
+
+   Si el equipo ya tiene Django instalado y no puede descargar paquetes, usar `python -m venv --system-site-packages .venv`.
+
+2. Activarlo:
+
+   ```powershell
    .\.venv\Scripts\Activate.ps1
    ```
 
-   Si Django ya está instalado en el Python del equipo y no hay acceso a internet, agregar `--system-site-packages` al crear el entorno.
+3. Instalar dependencias:
 
-2. Instalar las dependencias: `python -m pip install -r requirements.txt`.
-3. Copiar `.env.example` como `.env` y definir una clave secreta local.
-4. El modelo personalizado `cuentas.Usuario` ya está configurado como `AUTH_USER_MODEL`; debe permanecer definido antes de aplicar migraciones.
-5. Crear/aplicar migraciones (necesario al instalar en una base vacía):
+   ```powershell
+   python -m pip install -r requirements.txt
+   ```
+
+4. Crear la configuración local:
+
+   ```powershell
+   Copy-Item .env.example .env
+   ```
+
+   Reemplaza `SECRET_KEY` por una cadena aleatoria larga. Para el desarrollo local deja `DEBUG=True` y `ALLOWED_HOSTS=localhost,127.0.0.1`. Antes de sustentar o desplegar usa `DEBUG=False` y configura los hosts correspondientes.
+
+5. Crear las tablas y datos de demostración:
 
    ```powershell
    python manage.py migrate
-   ```
-
-6. Cargar los datos de demostración:
-
-   ```powershell
    python manage.py seed_demo
    ```
 
-7. Iniciar el servidor:
+6. Iniciar la aplicación:
 
    ```powershell
    python manage.py runserver
    ```
 
-## Cuentas locales de demostración
+7. Abrir `http://127.0.0.1:8000/`.
 
-El seed crea cuentas para estudiante, dos empresas y administrador. La contraseña compartida es `PracticasDemo2026!`.
+El modelo de usuario personalizado (`cuentas.Usuario`) ya está enlazado como `AUTH_USER_MODEL`. Si se prepara otra base desde cero, no se debe cambiar ese ajuste después de generar las migraciones iniciales.
 
-- `estudiante@demo.local`
-- `empresa1@demo.local`
-- `empresa2@demo.local`
-- `admin@demo.local`
+## Cuentas de demostración
 
-Estas credenciales son únicamente para desarrollo local. El comando `seed_demo` se puede volver a ejecutar; actualiza sus registros de demostración y no duplica categorías ni ofertas.
+El comando `seed_demo` crea cinco cuentas, dos empresas aprobadas y una pendiente, cinco categorías, treinta ofertas publicadas, una oferta pendiente y dos postulaciones de demostración. Las cuentas usan la contraseña local `PracticasDemo2026!`:
+
+| Rol | Correo |
+|---|---|
+| Estudiante | `estudiante@demo.local` |
+| Empresa | `empresa1@demo.local` |
+| Empresa | empresa2@demo.local |
+| Empresa pendiente | empresa3@demo.local |
+| Administrador de plataforma | `admin@demo.local` |
+
+Estas credenciales son solo para desarrollo. Cada vez que se ejecuta el seed, actualiza las contraseñas de demostración. Para usar el Django Admin se requiere una cuenta con `is_staff`; puedes crearla con `python manage.py createsuperuser`.
+
+## Pruebas y verificaciones
+
+```powershell
+python manage.py check
+python manage.py makemigrations --check --dry-run
+python manage.py test
+```
+
+La matriz ejecutada está en [`docs/pruebas/matriz-pruebas.md`](docs/pruebas/matriz-pruebas.md).
+
+## Estructura
+
+```text
+config/          Configuración, rutas y páginas de error
+cuentas/         Usuario, perfiles, autenticación y gestión de cuentas
+ofertas/         Categorías, ofertas, búsqueda y aprobaciones
+postulaciones/   Candidaturas y cambios de estado
+panel/           Indicadores, reportes y exportación CSV
+templates/       Plantillas compartidas y páginas por módulo
+static/          CSS y JavaScript
+docs/            Análisis, diseño, pruebas y manual
+```
+
+## Documentación
+
+- [Análisis](docs/01-analisis.md)
+- [Diseño y modelo E-R](docs/02-diseno/01-modelo-er.md)
+- [Mapa de URLs y vistas](docs/02-diseno/02-mapa-urls.md)
+- [Wireframes](docs/02-diseno/03-wireframes.md)
+- [Arquitectura](docs/02-diseno/04-arquitectura.md)
+- [Guion para el video](docs/guion-video.md)
+- [Presentación de sustentación](docs/presentacion.pptx)
+- [Guion y ruta de demo](docs/sustentacion.md)
+- [Manual de usuario](docs/manual-usuario.md)
+- [Decisiones técnicas](docs/decisiones-tecnicas.md)
+- [Matriz de pruebas](docs/pruebas/matriz-pruebas.md)

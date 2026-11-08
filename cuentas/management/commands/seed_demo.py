@@ -1,10 +1,11 @@
-﻿from datetime import timedelta
+from datetime import timedelta
 
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
 from cuentas.models import Empresa, PerfilEstudiante, Usuario
 from ofertas.models import Categoria, Oferta
+from postulaciones.models import Postulacion
 
 
 class Command(BaseCommand):
@@ -52,6 +53,21 @@ class Command(BaseCommand):
                 },
             )
             empresas.append(empresa)
+
+        usuario_pendiente = self.usuario_demo(
+            'empresa3@demo.local', 'Representante Empresa 3', Usuario.Rol.EMPRESA, clave,
+        )
+        empresa_pendiente, _ = Empresa.objects.update_or_create(
+            usuario=usuario_pendiente,
+            defaults={
+                'razon_social': 'Innovación Digital S.A.S.',
+                'nit': '900123453-3',
+                'sector': 'Tecnología',
+                'ciudad': 'Medellín',
+                'descripcion': 'Empresa de demostración pendiente de aprobación.',
+                'estado': Empresa.Estado.PENDIENTE,
+            },
+        )
 
         categorias_nombres = [
             'Desarrollo de software', 'Datos y analítica', 'Diseño y experiencia de usuario',
@@ -108,11 +124,25 @@ class Command(BaseCommand):
             },
         )
 
+        ofertas_semilla = list(Oferta.objects.filter(
+            empresa__in=empresas, estado=Oferta.Estado.PUBLICADA,
+        ).order_by('id')[:2])
+        estados_demo = [Postulacion.Estado.EN_REVISION, Postulacion.Estado.PRESELECCIONADO]
+        mensajes_demo = [
+            'Tengo experiencia inicial en proyectos académicos con Python y SQL.',
+            'Me interesa aportar al equipo y seguir creciendo en análisis de datos.',
+        ]
+        for oferta, estado, mensaje in zip(ofertas_semilla, estados_demo, mensajes_demo):
+            Postulacion.objects.update_or_create(
+                oferta=oferta, estudiante=estudiante,
+                defaults={'estado': estado, 'mensaje': mensaje},
+            )
+
         self.stdout.write(self.style.SUCCESS(
-            'Seed listo: 4 usuarios, 2 empresas, 5 categorías, '
-            '30 ofertas publicadas y 1 oferta pendiente.'
+            'Seed listo: 5 usuarios, 3 empresas (2 aprobadas y 1 pendiente), 5 categorías, '
+            '30 ofertas publicadas, 1 oferta pendiente y 2 postulaciones de demostración.'
         ))
-        self.stdout.write('Cuentas demo: estudiante@demo.local, empresa1@demo.local, empresa2@demo.local y admin@demo.local')
+        self.stdout.write('Cuentas demo: estudiante@demo.local, empresa1@demo.local, empresa2@demo.local, empresa3@demo.local y admin@demo.local')
         self.stdout.write('Contraseña local compartida: PracticasDemo2026!')
         self.stdout.write('No uses estas credenciales en producción.')
 
