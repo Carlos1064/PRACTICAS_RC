@@ -1,6 +1,9 @@
 from datetime import timedelta
+import os
 
-from django.core.management.base import BaseCommand
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
+from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 
 from cuentas.models import Empresa, PerfilEstudiante, Usuario
@@ -9,10 +12,20 @@ from postulaciones.models import Postulacion
 
 
 class Command(BaseCommand):
-    help = 'Crea o actualiza datos de demostración para el desarrollo local.'
+    help = 'Crea o actualiza datos sintéticos de demostración.'
 
     def handle(self, *args, **options):
-        clave = 'PracticasDemo2026!'
+        en_render = bool(os.environ.get('RENDER'))
+        clave = os.environ.get('DEMO_PASSWORD', '')
+        if en_render and not clave:
+            raise CommandError('Configura DEMO_PASSWORD para cargar cuentas demo en Render.')
+        if not clave:
+            clave = 'PracticasDemo2026!'
+        if en_render:
+            try:
+                validate_password(clave)
+            except ValidationError as error:
+                raise CommandError('DEMO_PASSWORD no cumple los requisitos de seguridad.') from error
         estudiante = self.usuario_demo(
             'estudiante@demo.local', 'Estudiante Demo', Usuario.Rol.ESTUDIANTE, clave,
         )
@@ -30,7 +43,7 @@ class Command(BaseCommand):
         administrador = self.usuario_demo(
             'admin@demo.local', 'Administración Demo',
             Usuario.Rol.ADMINISTRADOR, clave,
-            is_staff=True, is_superuser=True,
+            is_staff=not en_render, is_superuser=not en_render,
         )
         empresas = []
         for numero, nombre, ciudad in [
@@ -143,21 +156,25 @@ class Command(BaseCommand):
             '30 ofertas publicadas, 1 oferta pendiente y 2 postulaciones de demostración.'
         ))
         self.stdout.write('Cuentas demo: estudiante@demo.local, empresa1@demo.local, empresa2@demo.local, empresa3@demo.local y admin@demo.local')
-        self.stdout.write('Contraseña local compartida: PracticasDemo2026!')
-        self.stdout.write('No uses estas credenciales en producción.')
+        if en_render:
+            self.stdout.write('Las cuentas demo usan la clave privada definida en DEMO_PASSWORD.')
+        else:
+            self.stdout.write('Clave local compartida: PracticasDemo2026!')
+            self.stdout.write('No uses estas credenciales en produccion.')
 
     @staticmethod
     def usuario_demo(correo, nombre, rol, clave, **flags):
-        usuario, _ = Usuario.objects.get_or_create(
+        usuario, creado = Usuario.objects.get_or_create(
             correo=correo,
             defaults={'nombre': nombre, 'rol': rol, **flags},
         )
-        usuario.nombre = nombre
-        usuario.rol = rol
-        usuario.is_active = True
-        for campo in ('is_staff', 'is_superuser'):
-            if campo in flags:
-                setattr(usuario, campo, flags[campo])
-        usuario.set_password(clave)
+        if creado or not os.environ.get('RENDER'):
+            usuario.nombre = nombre
+            usuario.rol = rol
+            usuario.is_active = True
+            for campo in ('is_staff', 'is_superuser'):
+                if campo in flags:
+                    setattr(usuario, campo, flags[campo])
+            usuario.set_password(clave)
         usuario.save()
         return usuario

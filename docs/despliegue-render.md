@@ -23,7 +23,18 @@ En **Settings → Build & Deploy** configura:
 - **Build Command:** `bash build.sh`
 - **Start Command:** `gunicorn config.wsgi:application --bind 0.0.0.0:$PORT`
 
-El build instala dependencias, recopila CSS/JavaScript con `collectstatic` y aplica las migraciones a la base configurada. No ejecutes `seed_demo` en el servicio público: crea cuentas con una contraseña de demostración conocida.
+El build instala dependencias, recopila CSS/JavaScript con `collectstatic`, aplica las migraciones y crea el administrador inicial.
+
+## Cargar datos sintéticos para una demostración
+
+La base local de este proyecto contiene datos sintéticos: cinco cuentas, tres empresas, cinco categorías, treinta ofertas publicadas, una pendiente y dos postulaciones. Para generarlos en PostgreSQL sin usar Shell, agrega temporalmente al Environment del servicio:
+
+- `LOAD_DEMO_DATA` = `true`
+- `DEMO_PASSWORD` = una contraseña demo fuerte y privada
+
+Selecciona **Save, rebuild, and deploy**. Después de que el build termine correctamente, elimina ambas variables y vuelve a desplegar. Las cuentas estudiante y empresa usarán la contraseña definida en `DEMO_PASSWORD`; el comando conserva la contraseña del administrador creado anteriormente. No muestra la contraseña en los logs.
+
+La carga recrea los registros definidos por `seed_demo`; no copia cambios manuales que pudieras haber hecho en filas de la base SQLite local. No subas `db.sqlite3` ni archivos de exportación con datos reales al repositorio público.
 
 ## Cuenta y primeros datos
 
