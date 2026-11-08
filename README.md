@@ -119,3 +119,4 @@ docs/            Análisis, diseño, pruebas y manual
 - [Manual de usuario](docs/manual-usuario.md)
 - [Decisiones técnicas](docs/decisiones-tecnicas.md)
 - [Matriz de pruebas](docs/pruebas/matriz-pruebas.md)
+- [Despliegue en Render](docs/despliegue-render.md)
