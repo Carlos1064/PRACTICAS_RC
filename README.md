@@ -109,10 +109,10 @@ docs/            Análisis, diseño, pruebas y manual
 ## Documentación
 
 - [Análisis](docs/01-analisis.md)
-- [Diseño y modelo E-R](docs/02-diseno/01-modelo-er.md)
-- [Mapa de URLs y vistas](docs/02-diseno/02-mapa-urls.md)
-- [Wireframes](docs/02-diseno/03-wireframes.md)
-- [Arquitectura](docs/02-diseno/04-arquitectura.md)
+- [Diseño y modelo E-R](docs/02-diseño/01-modelo-er.md)
+- [Mapa de URLs y vistas](docs/02-diseño/02-mapa-urls.md)
+- [Wireframes](docs/02-diseño/03-wireframes.md)
+- [Arquitectura](docs/02-diseño/04-arquitectura.md)
 - [Guion para el video](docs/guion-video.md)
 - [Presentación de sustentación](docs/presentacion.pptx)
 - [Guion y ruta de demo](docs/sustentacion.md)
