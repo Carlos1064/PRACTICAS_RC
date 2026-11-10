@@ -1,4 +1,4 @@
-﻿(function () {
+(function () {
   const form = document.querySelector('[data-offer-search]');
   const results = document.querySelector('#offer-results');
   if (!form || !results) return;

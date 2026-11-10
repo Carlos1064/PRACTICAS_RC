@@ -1,4 +1,4 @@
-﻿(function () {
+(function () {
   if (!window.Chart) return;
   const palette = ['#245c49', '#4b8b68', '#8db89c', '#d1a43b', '#6b8194', '#9a6e75'];
   const dataFrom = function (id) {

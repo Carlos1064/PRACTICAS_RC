@@ -1,4 +1,4 @@
-﻿{% comment %}Uso: {% include "components/campo_formulario.html" with field=form.nombre %}{% endcomment %}
+{% comment %}Uso: {% include "components/campo_formulario.html" with field=form.nombre %}{% endcomment %}
 <div class="form-field{% if field.errors %} has-error{% endif %}">
   <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %}<span class="required-mark" aria-hidden="true"> *</span><span class="sr-only"> (obligatorio)</span>{% endif %}</label>
   {{ field }}

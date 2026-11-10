@@ -1,4 +1,4 @@
-﻿<article class="offer-card">
+<article class="offer-card">
   <div class="offer-card-top"><span class="eyebrow">{{ oferta.get_tipo_display }}</span><span class="status-badge status-{{ oferta.estado }}">{{ oferta.get_estado_display }}</span></div>
   <h3><a href="/ofertas/{{ oferta.pk }}/">{{ oferta.titulo }}</a></h3>
   <p class="offer-company">{{ oferta.empresa.razon_social }} · {{ oferta.empresa.ciudad }}</p>

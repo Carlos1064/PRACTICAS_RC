@@ -1,4 +1,4 @@
-﻿{% if ofertas %}
+{% if ofertas %}
   <p class="result-summary">{{ total_resultados }} oportunidad{{ total_resultados|pluralize:"es" }} disponible{{ total_resultados|pluralize:"s" }}</p>
   <div class="offer-grid">{% for oferta in ofertas %}{% include "components/tarjeta_oferta.html" with oferta=oferta %}{% endfor %}</div>
   {% include "components/paginacion.html" %}
