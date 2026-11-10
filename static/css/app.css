@@ -18,3 +18,6 @@
 @media(max-width:900px){.chart-grid{grid-template-columns:1fr}.report-filters .form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:580px){.report-filters .form-grid{grid-template-columns:1fr}.user-update-form{grid-template-columns:1fr;min-width:160px}}
 .field-error[role="alert"]{font-size:.86rem}.form-field input[aria-invalid="true"],.form-field select[aria-invalid="true"],.form-field textarea[aria-invalid="true"]{border-color:var(--danger);box-shadow:0 0 0 2px rgba(167,53,53,.1)}.alert-info{background:#edf4fa;border-color:#c9d9e8;color:#34546d}
+
+/* Keep offer results in row order even if another layout rule targets cards. */
+.results-region .offer-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;grid-auto-flow:row!important}.results-region .offer-grid>.offer-card{grid-column:auto!important;grid-row:auto!important}@media(max-width:640px){.results-region .offer-grid{grid-template-columns:1fr!important}}
