@@ -90,33 +90,3 @@ python manage.py check
 python manage.py makemigrations --check --dry-run
 python manage.py test
 ```
-
-La matriz ejecutada está en [`docs/pruebas/matriz-pruebas.md`](docs/pruebas/matriz-pruebas.md).
-
-## Estructura
-
-```text
-config/          Configuración, rutas y páginas de error
-cuentas/         Usuario, perfiles, autenticación y gestión de cuentas
-ofertas/         Categorías, ofertas, búsqueda y aprobaciones
-postulaciones/   Candidaturas y cambios de estado
-panel/           Indicadores, reportes y exportación CSV
-templates/       Plantillas compartidas y páginas por módulo
-static/          CSS y JavaScript
-docs/            Análisis, diseño, pruebas y manual
-```
-
-## Documentación
-
-- [Análisis](docs/01-analisis.md)
-- [Diseño y modelo E-R](docs/02-diseño/01-modelo-er.md)
-- [Mapa de URLs y vistas](docs/02-diseño/02-mapa-urls.md)
-- [Wireframes](docs/02-diseño/03-wireframes.md)
-- [Arquitectura](docs/02-diseño/04-arquitectura.md)
-- [Guion para el video](docs/guion-video.md)
-- [Presentación de sustentación](docs/presentacion.pptx)
-- [Guion y ruta de demo](docs/sustentacion.md)
-- [Manual de usuario](docs/manual-usuario.md)
-- [Decisiones técnicas](docs/decisiones-tecnicas.md)
-- [Matriz de pruebas](docs/pruebas/matriz-pruebas.md)
-- [Despliegue en Render](docs/despliegue-render.md)
